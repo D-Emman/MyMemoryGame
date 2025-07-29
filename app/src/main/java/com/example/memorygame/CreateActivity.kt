@@ -22,8 +22,8 @@ class CreateActivity : AppCompatActivity() {
             insets
         }
 
-        boardSize = intent.getSerializable(EXTRA_BOARD_SIZE) as BoardSize
-        numImagesRequired = boardSize.getNumPairs()
-        supportActionBar?.title = "choose pics (0/ $numImagesRequired)"
+//        boardSize = intent.getSerializable(EXTRA_BOARD_SIZE) as BoardSize
+//        numImagesRequired = boardSize.getNumPairs()
+//        supportActionBar?.title = "choose pics (0/ $numImagesRequired)"
     }
 }
