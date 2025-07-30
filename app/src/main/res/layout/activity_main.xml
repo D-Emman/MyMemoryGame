@@ -10,6 +10,7 @@
     android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
+
     <!--    <androidx.appcompat.widget.Toolbar-->
     <!--        android:id="@+id/my_toolbar"-->
     <!--        android:layout_width="0dp"-->
@@ -21,6 +22,7 @@
     <!--        app:layout_constraintStart_toStartOf="parent"-->
     <!--        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"-->
     <!--        tools:ignore="MissingConstraints" />-->
+
 
     <LinearLayout
         android:id="@+id/llGameInfo"
