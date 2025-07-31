@@ -11,6 +11,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.RadioGroup
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.app.ActivityCompat.startActivityForResult
@@ -26,6 +27,31 @@ import com.example.memorygame.utils.EXTRA_BOARD_SIZE
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
+
+
+//        private val photoPickerLauncher = registerForActivityResult(
+//            ActivityResultContracts.PickVisualMedia()
+//        ) { uri ->
+//            if (uri != null) {
+//                // Display or use the selected image
+//                findViewById<ImageView>(R.id.imageView).setImageURI(uri)
+//            } else {
+//                Toast.makeText(this, "No photo selected", Toast.LENGTH_SHORT).show()
+//            }
+//        }
+//
+//        override fun onCreate(savedInstanceState: Bundle?) {
+//            super.onCreate(savedInstanceState)
+//            setContentView(R.layout.activity_main)
+//
+//            findViewById<Button>(R.id.pickImageButton).setOnClickListener {
+//                photoPickerLauncher.launch(
+//                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+//                )
+//            }
+//        }
+//    }
+
 
     companion object{
         private const val TAG = "MainActivity"
@@ -45,13 +71,20 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        clRoot = findViewById(R.id.clRoot)
+        clRoot = findViewById (R.id.clRoot)
         rvBoard = findViewById(R.id.rvBoard)
         tvNumMoves = findViewById(R.id.tvNumMoves)
         tvNumPairs = findViewById(R.id.tvNumPairs)
 
+        //hack1 for dev
+         val intent = Intent(this, CreateActivity::class.java)
+        intent.putExtra(EXTRA_BOARD_SIZE, BoardSize.MEDIUM)
+        startActivity(intent)
+
         setupBoard()
     }
+
+
 
 
 
@@ -144,7 +177,7 @@ class MainActivity : AppCompatActivity() {
                 tvNumPairs.text = "Pairs: 0/9"
             }
             BoardSize.HARD -> {
-                tvNumMoves.text = "Easy: 8 x 4"
+                tvNumMoves.text = "Hard: 8 x 4"
                 tvNumPairs.text = "Pairs: 0/16"
             }
         }

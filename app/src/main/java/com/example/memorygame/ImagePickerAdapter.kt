@@ -12,13 +12,19 @@ import kotlin.math.min
 
 class ImagePickerAdapter(
     private val context: Context,
-    private val chosenImageUris: List<Uri>,
+    private val imageUris: List<Uri>,
+//    private val chosenImageUris: List<Uri>,
     private val boardSize: BoardSize,
-): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private val imageClickListener: ImageClickListener
+): RecyclerView.Adapter<ImagePickerAdapter.ViewHolder>() {
+
+    interface ImageClickListener{
+        fun onPlaceholderClicked()
+    }
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): RecyclerView.ViewHolder {
+    ): ViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.card_image, parent, false)
         val cardWidth = parent.width/boardSize.getWidth()
         val cardHeight = parent.height/boardSize.getHeight()
@@ -30,14 +36,34 @@ class ImagePickerAdapter(
 
     }
 
-    override fun onBindViewHolder(
-        holder: RecyclerView.ViewHolder,
-        position: Int
-    ) {
-        TODO("Not yet implemented")
-    }
-
     override fun getItemCount() = boardSize.getNumPairs()
 
-    inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView)
+    override fun onBindViewHolder(
+        holder: ViewHolder,
+        position: Int
+    ) {
+        if (position< imageUris.size){
+            holder.bind(imageUris[position])
+        } else {
+            holder.bind()
+        }
+
+    }
+
+
+    inner class ViewHolder(itemView: View): RecyclerView.ViewHolder(itemView){
+        private val ivCustomImage = itemView.findViewById<ImageView>(R.id.ivCustomView)
+
+        fun bind(uri: Uri){
+            ivCustomImage.setImageURI(uri)
+            ivCustomImage.setOnClickListener(null)
+        }
+
+        fun bind(){
+            ivCustomImage.setOnClickListener{
+                //Launch intent for user to select photos
+                imageClickListener.onPlaceholderClicked()
+            }
+        }
+    }
 }
