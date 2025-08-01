@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.ClipData
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -24,7 +25,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.memorygame.models.BoardSize
+import com.example.memorygame.utils.BitmapScaler
 import com.example.memorygame.utils.EXTRA_BOARD_SIZE
+import java.io.ByteArrayOutputStream
 
 class CreateActivity : AppCompatActivity() {
 
@@ -182,7 +185,12 @@ class CreateActivity : AppCompatActivity() {
         } else{
             MediaStore.Images.Media.getBitmap(contentResolver, photoUri)
         }
-
+        Log.i(TAG, "Original width ${originalBitmap.width} and height ${originalBitmap.height}")
+        val scaledBitmap = BitmapScaler.scaleToFitHeight(originalBitmap, 250)
+        Log.i(TAG, "Scaled width ${scaledBitmap.width} and height ${scaledBitmap.height}")
+        val byteOutputStream = ByteArrayOutputStream()
+        scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 60, byteOutputStream)
+        return byteOutputStream.toByteArray()
     }
 
     private fun shouldEnableSaveButton(): Boolean {
