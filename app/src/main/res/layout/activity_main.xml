@@ -19,8 +19,6 @@
     <!--        app:layout_constraintStart_toStartOf="parent"-->
     <!--        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"-->
     <!--        tools:ignore="MissingConstraints" />-->
-
-
     <LinearLayout
         android:id="@+id/llGameInfo"
         android:layout_width="0dp"
