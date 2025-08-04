@@ -25,21 +25,24 @@ import com.example.memorygame.models.MemoryGame
 import com.example.memorygame.utils.DEFAULT_ICONS
 import com.example.memorygame.utils.EXTRA_BOARD_SIZE
 import com.google.android.material.snackbar.Snackbar
+import android.widget.ImageView
+import android.widget.Toast
 
 class MainActivity : AppCompatActivity() {
 
 
-//        private val photoPickerLauncher = registerForActivityResult(
-//            ActivityResultContracts.PickVisualMedia()
-//        ) { uri ->
-//            if (uri != null) {
-//                // Display or use the selected image
-//                findViewById<ImageView>(R.id.imageView).setImageURI(uri)
-//            } else {
-//                Toast.makeText(this, "No photo selected", Toast.LENGTH_SHORT).show()
-//            }
-//        }
-//
+        private val photoPickerLauncher = registerForActivityResult(
+            ActivityResultContracts.PickVisualMedia()
+        ) { uri ->
+            if (uri != null) {
+                // Display or use the selected image
+                findViewById<ImageView>(R.id.ivCustomView)
+                    .setImageURI(uri)
+            } else {
+                Toast.makeText(this, "No photo selected", Toast.LENGTH_SHORT).show()
+            }
+        }
+
 //        override fun onCreate(savedInstanceState: Bundle?) {
 //            super.onCreate(savedInstanceState)
 //            setContentView(R.layout.activity_main)
