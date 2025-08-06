@@ -1,5 +1,6 @@
 package com.example.memorygame
 
+import android.Manifest
 import android.app.Activity
 import android.content.ClipData
 import android.content.Intent
@@ -17,25 +18,49 @@ import android.util.Log
 import android.view.MenuItem
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.memorygame.models.BoardSize
 import com.example.memorygame.utils.BitmapScaler
 import com.example.memorygame.utils.EXTRA_BOARD_SIZE
+import com.example.memorygame.utils.SupabaseStorage
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
+import io.github.jan.supabase.storage.UploadData
+
+import io.github.jan.supabase.storage.storage
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
+import kotlin.math.log
 
 class CreateActivity : AppCompatActivity() {
 
+
+    private val photoPickerLauncher = registerForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            // Display or use the selected image
+            findViewById<ImageView>(R.id.ivCustomView)
+                .setImageURI(uri)
+        } else {
+            Toast.makeText(this, "No photo selected", Toast.LENGTH_SHORT).show()
+        }
+    }
     companion object{
         private const val TAG = "CreateActivity"
         private const val PICK_PHOTOS_CODE = 312
         private const val READ_EXTERNAL_PHOTOS_CODE = 512
-        private const val READ_PHOTOS_PERMISSION = android.Manifest.permission.READ_EXTERNAL_STORAGE
+        private const val READ_PHOTOS_PERMISSION = Manifest.permission.READ_EXTERNAL_STORAGE
         private const val MIN_GAME_LENGTH = 3
         private const val MAX_GAME_LENGTH = 14
     }
@@ -52,6 +77,18 @@ class CreateActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        SupabaseStorage.init()
+
+
+        // trail block
+//        val pickBtn = findViewById<ImageView>(R.id.rvImagePicker)
+//        pickBtn.setOnClickListener {
+//            photoPickerLauncher.launch(
+//                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+//            )
+//        }
+
+
         setContentView(R.layout.activity_create)
 
         rvImagePicker = findViewById(R.id.rvImagePicker)
@@ -103,7 +140,17 @@ class CreateActivity : AppCompatActivity() {
             object: ImagePickerAdapter.ImageClickListener{
                 override fun onPlaceholderClicked() {
                     if (isPermissionGranted(this@CreateActivity, READ_PHOTOS_PERMISSION)) {
-                            launchIntentForPhotos()
+
+                        // trail block
+                        val pickBtn = findViewById<ImageView>(R.id.rvImagePicker)
+                        pickBtn.setOnClickListener {
+                            photoPickerLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        }
+
+
+                        launchIntentForPhotos()
                         } else{
                             requestPermission(this@CreateActivity,READ_PHOTOS_PERMISSION, READ_EXTERNAL_PHOTOS_CODE)
                         }
@@ -147,7 +194,7 @@ class CreateActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?){
         super.onActivityResult(requestCode, resultCode, data)
-        if(requestCode != PICK_PHOTOS_CODE || resultCode != Activity.RESULT_OK|| data ==null){
+        if(requestCode != PICK_PHOTOS_CODE || resultCode != RESULT_OK || data ==null){
            Log.w(TAG, "Did you not get data back from the launched activity, user likely canceled flow")
             return
         }
@@ -170,13 +217,84 @@ class CreateActivity : AppCompatActivity() {
         btnSave.isEnabled = shouldEnableSaveButton()
     }
 
-    private fun saveDataToFirebase() {
-        Log.i(TAG, "saveDataToFirebase")
-        for ((index, photoUri) in chosenImageUris.withIndex()){
-            val imageByteArray = getImageByteArray(photoUri)
+//    private fun saveDataToFirebase() {
+//        Log.i(TAG, "saveDataToFirebase")
+//        for ((index, photoUri) in chosenImageUris.withIndex()){
+//            val imageByteArray = getImageByteArray(photoUri)
+//        }
+
+        private fun saveDataToFirebase() {
+            if (chosenImageUris.size != numImagesRequired || etGameName.text.isBlank()) {
+                Toast.makeText(this, "Select enough images and enter a game name", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            val gameName = etGameName.text.toString().trim()
+            val imageUrls = mutableListOf<String>()
+
+            Thread {
+                try {
+                    for ((index, uri) in chosenImageUris.withIndex()) {
+                        val imageBytes = getImageByteArray(uri)
+                        val fileName = "game_${gameName}_${System.currentTimeMillis()}_$index.jpg"
+
+                        lifecycleScope.launch {
+                            val result = SupabaseStorage.client.storage.from("custom")
+
+
+                            result.upload(
+                                fileName,
+                                imageBytes
+                            )
+                            {
+                                upsert = false
+                            }
+
+
+                            val publicUrl = SupabaseStorage.client.storage
+                                .from("custom")
+                                .publicUrl(fileName)
+
+                            imageUrls.add(publicUrl)
+                            Log.i(TAG, "Uploaded $fileName → $publicUrl")
+                        }
+
+                        //lifecyclescope end
+                    }
+
+                    // Save to Firestore
+                    val db = Firebase.firestore
+                    val gameData = hashMapOf(
+                        "name" to gameName,
+                        "images" to imageUrls,
+                        "boardSize" to boardSize.name,
+                        "createdAt" to System.currentTimeMillis()
+                    )
+
+                    db.collection("custom_games").document(gameName).set(gameData)
+                        .addOnSuccessListener {
+                            runOnUiThread {
+                                Toast.makeText(this, "Game saved to cloud!", Toast.LENGTH_SHORT).show()
+                                finish()
+                            }
+                        }
+                        .addOnFailureListener {
+                            runOnUiThread {
+                                Toast.makeText(this, "Failed to save metadata: ${it.message}", Toast.LENGTH_LONG).show()
+                            }
+                        }
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    runOnUiThread {
+                        Toast.makeText(this, "Upload error: ${e.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }.start()
         }
 
-    }
+
+   // }
 
     private fun getImageByteArray(photoUri: Uri): ByteArray {
         val originalBitmap = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P){
@@ -208,6 +326,10 @@ class CreateActivity : AppCompatActivity() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-        startActivityForResult(Intent.createChooser(intent, "CHoose pics"), PICK_PHOTOS_CODE)
+        startActivityForResult(Intent.createChooser(intent, "Choose pics"), PICK_PHOTOS_CODE)
     }
+
+
+
+
 }

@@ -38,6 +38,11 @@ android {
 }
 
 dependencies {
+
+    implementation("io.github.jan-tennert.supabase:gotrue-kt:2.6.1")
+    implementation("io.github.jan-tennert.supabase:storage-kt:3.2.2")
+    implementation("io.github.jan-tennert.supabase:postgrest-kt:3.2.2")
+
     implementation("androidx.core:core-ktx:1.16.0")
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("com.google.android.material:material:1.12.0")
@@ -54,7 +59,10 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
-    implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-storage")
+
+    implementation("com.google.firebase:firebase-firestore-ktx:24.9.0")
+    implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
+//    implementation("com.google.firebase:firebase-firestore")
+//    implementation("com.google.firebase:firebase-storage")
 
 }

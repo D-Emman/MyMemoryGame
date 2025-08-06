@@ -31,17 +31,17 @@ import android.widget.Toast
 class MainActivity : AppCompatActivity() {
 
 
-        private val photoPickerLauncher = registerForActivityResult(
-            ActivityResultContracts.PickVisualMedia()
-        ) { uri ->
-            if (uri != null) {
-                // Display or use the selected image
-                findViewById<ImageView>(R.id.ivCustomView)
-                    .setImageURI(uri)
-            } else {
-                Toast.makeText(this, "No photo selected", Toast.LENGTH_SHORT).show()
-            }
+    private val photoPickerLauncher = registerForActivityResult(
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            // Display or use the selected image
+            findViewById<ImageView>(R.id.ivCustomView)
+                .setImageURI(uri)
+        } else {
+            Toast.makeText(this, "No photo selected", Toast.LENGTH_SHORT).show()
         }
+    }
 
 //        override fun onCreate(savedInstanceState: Bundle?) {
 //            super.onCreate(savedInstanceState)
@@ -73,6 +73,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
 
         clRoot = findViewById (R.id.clRoot)
         rvBoard = findViewById(R.id.rvBoard)
