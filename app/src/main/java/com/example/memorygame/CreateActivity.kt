@@ -23,6 +23,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -60,7 +61,8 @@ class CreateActivity : AppCompatActivity() {
         private const val TAG = "CreateActivity"
         private const val PICK_PHOTOS_CODE = 312
         private const val READ_EXTERNAL_PHOTOS_CODE = 512
-        private const val READ_PHOTOS_PERMISSION = Manifest.permission.READ_EXTERNAL_STORAGE
+        @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+        private const val READ_PHOTOS_PERMISSION = Manifest.permission.READ_MEDIA_IMAGES
         private const val MIN_GAME_LENGTH = 3
         private const val MAX_GAME_LENGTH = 14
     }
@@ -138,11 +140,12 @@ class CreateActivity : AppCompatActivity() {
 
         adapter = ImagePickerAdapter(this, chosenImageUris, boardSize,
             object: ImagePickerAdapter.ImageClickListener{
+                @RequiresApi(Build.VERSION_CODES.TIRAMISU)
                 override fun onPlaceholderClicked() {
                     if (isPermissionGranted(this@CreateActivity, READ_PHOTOS_PERMISSION)) {
 
                         // trail block
-                        val pickBtn = findViewById<ImageView>(R.id.rvImagePicker)
+                        val pickBtn = findViewById<RecyclerView>(R.id.rvImagePicker)
                         pickBtn.setOnClickListener {
                             photoPickerLauncher.launch(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -271,7 +274,7 @@ class CreateActivity : AppCompatActivity() {
                         "createdAt" to System.currentTimeMillis()
                     )
 
-                    db.collection("custom_games").document(gameName).set(gameData)
+                    db.collection("custom").document(gameName).set(gameData)
                         .addOnSuccessListener {
                             runOnUiThread {
                                 Toast.makeText(this, "Game saved to cloud!", Toast.LENGTH_SHORT).show()

@@ -43,12 +43,13 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvImagePicker"
-        android:layout_width="409dp"
-        android:layout_height="812dp"
+        android:layout_width="356dp"
+        android:layout_height="601dp"
         android:layout_marginTop="16dp"
         android:overScrollMode="never"
         app:layout_constraintBottom_toTopOf="@+id/etGameName"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.666"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0" />
