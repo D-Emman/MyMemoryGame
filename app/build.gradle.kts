@@ -38,10 +38,11 @@ android {
 }
 
 dependencies {
-
+//    implementation(platform("io.github.jan-tennert.supabase:bom:VERSION"))
     implementation("io.github.jan-tennert.supabase:gotrue-kt:2.6.1")
     implementation("io.github.jan-tennert.supabase:storage-kt:3.2.2")
     implementation("io.github.jan-tennert.supabase:postgrest-kt:3.2.2")
+    implementation("io.ktor:ktor-client-cio:3.2.0")
 
     implementation("androidx.core:core-ktx:1.16.0")
     implementation("androidx.appcompat:appcompat:1.7.1")
