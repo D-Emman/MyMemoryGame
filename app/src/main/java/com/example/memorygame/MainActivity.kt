@@ -81,7 +81,7 @@ class MainActivity : AppCompatActivity() {
         tvNumPairs = findViewById(R.id.tvNumPairs)
 
         //hack1 for dev
-         val intent = Intent(this, CreateActivity::class.java)
+         val intent = Intent(this, CustomGameActivity::class.java)
         intent.putExtra(EXTRA_BOARD_SIZE, BoardSize.MEDIUM)
         startActivity(intent)
 

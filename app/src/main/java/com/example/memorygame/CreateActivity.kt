@@ -278,6 +278,14 @@ class CreateActivity : AppCompatActivity() {
                         .addOnSuccessListener {
                             runOnUiThread {
                                 Toast.makeText(this, "Game saved to cloud!", Toast.LENGTH_SHORT).show()
+
+                                // Launch CustomGameActivity with fresh images
+                                val intent = Intent(this, CustomGameActivity::class.java).apply {
+                                    putExtra("EXTRA_GAME_NAME", gameName)
+                                    putExtra("EXTRA_BOARD_SIZE", boardSize)
+                                    putStringArrayListExtra("EXTRA_IMAGE_URLS", ArrayList(imageUrls))
+                                }
+                                startActivity(intent)
                                 finish()
                             }
                         }
