@@ -45,6 +45,7 @@ import kotlin.math.log
 
 class CreateActivity : AppCompatActivity() {
 
+    private lateinit var btnSearchGames: Button
 
     private val photoPickerLauncher = registerForActivityResult(
         ActivityResultContracts.PickVisualMedia()
@@ -82,6 +83,9 @@ class CreateActivity : AppCompatActivity() {
         SupabaseStorage.init()
 
 
+
+
+
         // trail block
 //        val pickBtn = findViewById<ImageView>(R.id.rvImagePicker)
 //        pickBtn.setOnClickListener {
@@ -97,6 +101,10 @@ class CreateActivity : AppCompatActivity() {
         etGameName = findViewById(R.id.etGameName)
         btnSave = findViewById(R.id.btnSave)
 
+        // Link the button from XML
+        btnSearchGames = findViewById(R.id.btnSearchGames)
+
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -107,6 +115,13 @@ class CreateActivity : AppCompatActivity() {
         boardSize = intent.getSerializableExtra(EXTRA_BOARD_SIZE) as BoardSize
         numImagesRequired = boardSize.getNumPairs()
         supportActionBar?.title = "choose pics (0/ $numImagesRequired)"
+
+
+        // Handle click to go to SearchActivity
+        btnSearchGames.setOnClickListener {
+            val intent = Intent(this, SearchActivity::class.java)
+            startActivity(intent)
+        }
 
         btnSave.setOnClickListener{
             saveDataToFirebase()
@@ -226,6 +241,8 @@ class CreateActivity : AppCompatActivity() {
 //            val imageByteArray = getImageByteArray(photoUri)
 //        }
 
+
+
         private fun saveDataToFirebase() {
             if (chosenImageUris.size != numImagesRequired || etGameName.text.isBlank()) {
                 Toast.makeText(this, "Select enough images and enter a game name", Toast.LENGTH_SHORT).show()
@@ -338,6 +355,7 @@ class CreateActivity : AppCompatActivity() {
         intent.type = "image/*"
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
         startActivityForResult(Intent.createChooser(intent, "Choose pics"), PICK_PHOTOS_CODE)
+
     }
 
 

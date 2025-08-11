@@ -6,19 +6,20 @@
 
     <EditText
         android:id="@+id/etSearchGame"
-        android:hint="Enter game name"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="200dp"
+        android:hint="Enter game name" />
 
     <Button
         android:id="@+id/btnSearchGame"
-        android:text="Search"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:text="Search" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvSearchResults"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_width="378dp"
+        android:layout_height="652dp"
+        android:layout_weight="1" />
 </LinearLayout>

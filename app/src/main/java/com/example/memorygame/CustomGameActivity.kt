@@ -7,10 +7,13 @@ import android.widget.GridLayout
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.RecyclerView
 import com.example.memorygame.utils.SupabaseStorage
 import com.google.android.material.textview.MaterialTextView
 import io.github.jan.supabase.storage.storage
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.SupabaseClientBuilder
+import io.github.jan.supabase.SupabaseSerializer
 import io.github.jan.supabase.createSupabaseClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,8 +29,8 @@ class CustomGameActivity : AppCompatActivity() {
     }
 
     private lateinit var progressBar: ProgressBar
-    private lateinit var gameGrid: GridLayout
-    private lateinit var supabase: SupabaseClient
+    private lateinit var gameGrid: RecyclerView
+    private lateinit var supabase: SupabaseSerializer
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +40,7 @@ class CustomGameActivity : AppCompatActivity() {
         gameGrid = findViewById(R.id.rvGameGrid)
 
         //my try Init Supabase
-        supabase = SupabaseStorage.client
+        SupabaseStorage.init()
 
         val fromSearch = intent.getBooleanExtra(EXTRA_FROM_SEARCH, false)
         val gameName = intent.getStringExtra(EXTRA_GAME_NAME)
@@ -64,7 +67,7 @@ class CustomGameActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val bucket = supabase.storage.from("custom")
+                val bucket = SupabaseStorage.client.storage.from("custom")
                 val path = "$gameName/"
 
                 val fileList = bucket.list(path)

@@ -26,7 +26,7 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var searchEditText: EditText
     private lateinit var recyclerView: RecyclerView
-    private lateinit var progressBar: ProgressBar
+//    private lateinit var progressBar: ProgressBar
     private lateinit var searchAdapter: SearchAdapter
     private lateinit var supabase: SupabaseClient
 
@@ -68,13 +68,13 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun searchGames(query: String) {
-        progressBar.visibility = View.VISIBLE
+//        progressBar.visibility = View.VISIBLE
         gameList.clear()
 
         // Example search logic from Supabase storage
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val bucket = supabase.storage.from("custom_games")
+                val bucket = supabase.storage.from("custom")
                 val files = bucket.list() // returns list of StorageItem
 
                 val matchingGames = files
@@ -84,12 +84,12 @@ class SearchActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     gameList.addAll(matchingGames)
                     searchAdapter.notifyDataSetChanged()
-                    progressBar.visibility = View.GONE
+//                    progressBar.visibility = View.GONE
                 }
 
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-                    progressBar.visibility = View.GONE
+//                    progressBar.visibility = View.GONE
                     Toast.makeText(this@SearchActivity, "Error: ${e.message}", Toast.LENGTH_SHORT)
                         .show()
                 }
