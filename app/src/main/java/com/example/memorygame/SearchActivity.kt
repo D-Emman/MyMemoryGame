@@ -12,10 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.memorygame.utils.SupabaseStorage
-//import com.example.memorygame.SearchAdapter
-import com.example.yourapp.SearchAdapter
+import com.example.memorygame.SearchAdapter
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +24,7 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var searchEditText: EditText
     private lateinit var recyclerView: RecyclerView
-//    private lateinit var progressBar: ProgressBar
+    private lateinit var progressBar: ProgressBar
     private lateinit var searchAdapter: SearchAdapter
     private lateinit var supabase: SupabaseClient
 
@@ -41,12 +39,12 @@ class SearchActivity : AppCompatActivity() {
 
         searchEditText = findViewById(R.id.etSearchGame)
         recyclerView = findViewById(R.id.rvSearchResults)
-//        progressBar = findViewById(R.id.progressBarSearch)
+        progressBar = findViewById(R.id.progressBarSearch)
 
         searchAdapter = SearchAdapter(gameList) { selectedGame ->
             val intent = Intent(this, CustomGameActivity::class.java)
             intent.putExtra(CustomGameActivity.EXTRA_FROM_SEARCH, true)
-            intent.putExtra(CustomGameActivity.EXTRA_GAME_NAME, selectedGame)
+            intent.putStringArrayListExtra("SELECTED_IMAGES", ArrayList(gameList))
             startActivity(intent)
         }
 
@@ -68,7 +66,7 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun searchGames(query: String) {
-//        progressBar.visibility = View.VISIBLE
+        progressBar.visibility = View.VISIBLE
         gameList.clear()
 
         // Example search logic from Supabase storage
@@ -89,10 +87,11 @@ class SearchActivity : AppCompatActivity() {
 
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
-//                    progressBar.visibility = View.GONE
+                    progressBar.visibility = View.GONE
                     Toast.makeText(this@SearchActivity, "Error: ${e.message}", Toast.LENGTH_SHORT)
                         .show()
                 }
+                null
             }
         }}
 }

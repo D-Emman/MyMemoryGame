@@ -1,27 +1,28 @@
-package com.example.yourapp
+package com.example.memorygame
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.memorygame.R
 
 class SearchAdapter(
     private val gameList: List<String>,  // Could be List<Game> if you have a model
-    private val onItemClick: (String) -> Unit
+    private val onSelectionChanged: (List<String>) -> Unit
 ) : RecyclerView.Adapter<SearchAdapter.SearchViewHolder>() {
 
+
+    private val selectedItems = mutableSetOf<String>()
     inner class SearchViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val ivThumbnail: ImageView = itemView.findViewById(R.id.ivGameThumbnail)
+//      val ivThumbnail: ImageView = itemView.findViewById(R.id.ivGameThumbnail)
         val tvName: TextView = itemView.findViewById(R.id.tvGameName)
 
-        fun bind(gameName: String) {
-            tvName.text = gameName
-            // If you have image loading logic, add it here (Glide/Picasso)
-            itemView.setOnClickListener { onItemClick(gameName) }
-        }
+//        fun bind(gameName: String) {
+//            tvName.text = gameName
+//            // If you have image loading logic, add it here (Glide/Picasso)
+//            itemView.setOnClickListener { onSelectionChanged(gameName) }
+//        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchViewHolder {
@@ -31,8 +32,26 @@ class SearchAdapter(
     }
 
     override fun onBindViewHolder(holder: SearchViewHolder, position: Int) {
-        holder.bind(gameList[position])
+//        holder.bind(gameList[position])
+        val item = gameList[position]
+        holder.tvName.text = item
+
+        // Highlight selection
+        holder.itemView.setBackgroundColor(
+            if (selectedItems.contains(item)) Color.LTGRAY else Color.TRANSPARENT
+        )
+
+        holder.itemView.setOnClickListener {
+            if (selectedItems.contains(item)) {
+                selectedItems.remove(item)
+            } else {
+                selectedItems.add(item)
+            }
+            notifyItemChanged(position)
+            onSelectionChanged(selectedItems.toList())
+        }
     }
+
 
     override fun getItemCount(): Int = gameList.size
 }

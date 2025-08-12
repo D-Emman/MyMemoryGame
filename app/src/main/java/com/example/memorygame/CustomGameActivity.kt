@@ -1,22 +1,21 @@
 package com.example.memorygame
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.widget.GridLayout
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.memorygame.utils.SupabaseStorage
-import com.google.android.material.textview.MaterialTextView
 import io.github.jan.supabase.storage.storage
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.SupabaseClientBuilder
-import io.github.jan.supabase.SupabaseSerializer
-import io.github.jan.supabase.createSupabaseClient
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -30,7 +29,9 @@ class CustomGameActivity : AppCompatActivity() {
 
     private lateinit var progressBar: ProgressBar
     private lateinit var gameGrid: RecyclerView
-    private lateinit var supabase: SupabaseSerializer
+    private val matchedCards = mutableSetOf<Int>()
+    private val flippedCards = mutableListOf<Int>()
+    private lateinit var gameAdapter: MemoryGameAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,70 +40,79 @@ class CustomGameActivity : AppCompatActivity() {
         progressBar = findViewById(R.id.progressLoadingGame)
         gameGrid = findViewById(R.id.rvGameGrid)
 
-        //my try Init Supabase
         SupabaseStorage.init()
 
         val fromSearch = intent.getBooleanExtra(EXTRA_FROM_SEARCH, false)
-        val gameName = intent.getStringExtra(EXTRA_GAME_NAME)
+        val selectedImages = intent.getStringArrayListExtra("SELECTED_IMAGES") ?: arrayListOf()
 
-        if (fromSearch && !gameName.isNullOrEmpty()) {
-
-            // Instant load from search results
-            loadGameFromSupabase(gameName)
-
-        } else {
-            // Normal flow from CreateActivity
-            startNormalGame()
+        if (fromSearch && selectedImages.isNotEmpty()) {
+            loadMultipleSupabaseImages(selectedImages)
         }
     }
 
-    private fun startNormalGame() {
-        Toast.makeText(this, "Starting game in normal mode...", Toast.LENGTH_SHORT).show()
-        // Your existing local game setup code goes here
-    }
-
-    private fun loadGameFromSupabase(gameName: String) {
+    private fun loadMultipleSupabaseImages(gameNames: List<String>) {
         progressBar.visibility = View.VISIBLE
-        gameGrid.visibility = View.GONE
 
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch {
             try {
-                val bucket = SupabaseStorage.client.storage.from("custom")
-                val path = "$gameName/"
-
-                val fileList = bucket.list(path)
-
-                val imageUrls = fileList.map { file ->
-                    bucket.publicUrl("$path${file.name}")
-                }
-
-                withContext(Dispatchers.Main) {
-                    progressBar.visibility = View.GONE
-                    gameGrid.visibility = View.VISIBLE
-
-                    if (imageUrls.isEmpty()) {
-                        Toast.makeText(this@CustomGameActivity, "No images found for $gameName", Toast.LENGTH_SHORT).show()
-                        return@withContext
+                val urls = withContext(Dispatchers.IO) {
+                    val bucket = SupabaseStorage.client.storage.from("custom")
+                    val deferred = gameNames.map { name ->
+                        async { bucket.publicUrl(name) }
                     }
+                    deferred.awaitAll()
+                }
 
-                    // Load the images into your grid adapter
-                    setupGameGrid(imageUrls)
+                progressBar.visibility = View.GONE
+
+                if (urls.isEmpty()) {
+                    Toast.makeText(this@CustomGameActivity, "No images found", Toast.LENGTH_SHORT).show()
+                } else {
+                    startMemoryGame(urls)
                 }
+
             } catch (e: Exception) {
-                Log.e(TAG, "Error loading game from Supabase", e)
-                withContext(Dispatchers.Main) {
-                    progressBar.visibility = View.GONE
-                    Toast.makeText(this@CustomGameActivity, "Failed to load game", Toast.LENGTH_SHORT).show()
-                }
+                progressBar.visibility = View.GONE
+                e.printStackTrace()
+                Toast.makeText(this@CustomGameActivity, "Error loading images: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    private fun setupGameGrid(imageUrls: List<String>) {
-        // TODO: Implement your adapter or game UI logic using the imageUrls
-        // For now, just display them in logs
-        imageUrls.forEach { Log.d(TAG, "Image: $it") }
+    private fun startMemoryGame(images: List<String>) {
+        val pairedImages = (images + images).shuffled()
 
-        Toast.makeText(this, "Game loaded with ${imageUrls.size} images!", Toast.LENGTH_SHORT).show()
+        gameGrid.layoutManager = GridLayoutManager(this, 4)
+        gameAdapter = MemoryGameAdapter(pairedImages) { position ->
+            onCardClicked(position, pairedImages)
+        }
+        gameGrid.adapter = gameAdapter
+    }
+
+    private fun onCardClicked(position: Int, pairedImages: List<String>) {
+        if (matchedCards.contains(position) || flippedCards.contains(position)) return
+
+        flippedCards.add(position)
+        gameAdapter.revealCard(position)
+
+        if (flippedCards.size == 2) {
+            val firstPos = flippedCards[0]
+            val secondPos = flippedCards[1]
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                if (pairedImages[firstPos] == pairedImages[secondPos]) {
+                    matchedCards.add(firstPos)
+                    matchedCards.add(secondPos)
+                } else {
+                    gameAdapter.hideCard(firstPos)
+                    gameAdapter.hideCard(secondPos)
+                }
+                flippedCards.clear()
+
+                if (matchedCards.size == pairedImages.size) {
+                    Toast.makeText(this, "🎉 You Win!", Toast.LENGTH_LONG).show()
+                }
+            }, 1000)
+        }
     }
 }
