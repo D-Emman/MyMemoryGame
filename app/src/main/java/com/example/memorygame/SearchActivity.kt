@@ -1,97 +1,83 @@
 package com.example.memorygame
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
-import android.widget.EditText
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+//import com.example.memorygame.network.SupabaseStorage
 import com.example.memorygame.utils.SupabaseStorage
-import com.example.memorygame.SearchAdapter
-import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class SearchActivity : AppCompatActivity() {
+class SearchActivity : AppCompatActivity(), SearchAdapter.OnImageCheckedListener {
 
-    private lateinit var searchEditText: EditText
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
-    private lateinit var searchAdapter: SearchAdapter
-    private lateinit var supabase: SupabaseClient
+    private lateinit var btnConfirmSelection: Button
 
-    private val gameList = mutableListOf<String>()
+    private lateinit var searchAdapter: SearchAdapter
+    private val searchResults = mutableListOf<String>()
+    private val selectedUrls = mutableSetOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
-        // Initialize Supabase client
-        supabase = SupabaseStorage.client
+        recyclerView = findViewById(R.id.recyclerViewSearchResults)
+        progressBar = findViewById(R.id.progressBar)
+        btnConfirmSelection = findViewById(R.id.btnConfirmSelection)
 
-        searchEditText = findViewById(R.id.etSearchGame)
-        recyclerView = findViewById(R.id.rvSearchResults)
-        progressBar = findViewById(R.id.progressBarSearch)
-
-        searchAdapter = SearchAdapter(gameList) { selectedGame ->
-            val intent = Intent(this, CustomGameActivity::class.java)
-            intent.putExtra(CustomGameActivity.EXTRA_FROM_SEARCH, true)
-            intent.putStringArrayListExtra("SELECTED_IMAGES", ArrayList(gameList))
-            startActivity(intent)
-        }
-
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.layoutManager = GridLayoutManager(this, 3)
+        searchAdapter = SearchAdapter(searchResults, this)
         recyclerView.adapter = searchAdapter
 
-        searchEditText.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {}
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(query: CharSequence?, start: Int, before: Int, count: Int) {
-                if (query.isNullOrBlank()) {
-                    gameList.clear()
-                    searchAdapter.notifyDataSetChanged()
-                } else {
-                    searchGames(query.toString())
-                }
+        btnConfirmSelection.setOnClickListener {
+            if (selectedUrls.isEmpty()) {
+                Toast.makeText(this, "Select at least one image", Toast.LENGTH_SHORT).show()
+            } else {
+                val intent = Intent()
+                intent.putStringArrayListExtra("SELECTED_IMAGE_URLS", ArrayList(selectedUrls))
+                setResult(Activity.RESULT_OK, intent)
+                finish()
             }
-        })
+        }
+
+        loadSearchResults()
     }
 
-    private fun searchGames(query: String) {
+    private fun loadSearchResults() {
         progressBar.visibility = View.VISIBLE
-        gameList.clear()
-
-        // Example search logic from Supabase storage
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val bucket = supabase.storage.from("custom")
-                val files = bucket.list() // returns list of StorageItem
+                val bucket = SupabaseStorage.client.storage.from("custom")
+                val fileObjects = bucket.list()
 
-                val matchingGames = files
-                    .map { it.name }
-                    .filter { it.contains(query, ignoreCase = true) }
+                searchResults.clear()
+                searchResults.addAll(fileObjects.map { bucket.publicUrl(it.name) })
 
                 withContext(Dispatchers.Main) {
-                    gameList.addAll(matchingGames)
+                    progressBar.visibility = View.GONE
                     searchAdapter.notifyDataSetChanged()
-//                    progressBar.visibility = View.GONE
                 }
-
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     progressBar.visibility = View.GONE
-                    Toast.makeText(this@SearchActivity, "Error: ${e.message}", Toast.LENGTH_SHORT)
-                        .show()
+                    Toast.makeText(this@SearchActivity, "Error loading results", Toast.LENGTH_SHORT).show()
                 }
-                null
             }
-        }}
+        }
+    }
+
+    override fun onImageChecked(url: String, isChecked: Boolean) {
+        if (isChecked) selectedUrls.add(url) else selectedUrls.remove(url)
+    }
 }

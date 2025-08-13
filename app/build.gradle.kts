@@ -40,7 +40,7 @@ android {
 dependencies {
 
     implementation( "com.github.bumptech.glide:glide:4.16.0")
-    implementation("com.github.bumptech.glide:compiler:4.16.0")
+//    implementation("com.github.bumptech.glide:compiler:4.16.0")
 //    implementation(platform("io.github.jan-tennert.supabase:bom:VERSION"))
     implementation("io.github.jan-tennert.supabase:gotrue-kt:2.6.1")
     implementation("io.github.jan-tennert.supabase:storage-kt:3.2.2")

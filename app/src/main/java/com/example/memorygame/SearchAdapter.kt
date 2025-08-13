@@ -1,57 +1,52 @@
 package com.example.memorygame
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import android.widget.CheckBox
+import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 
 class SearchAdapter(
-    private val gameList: List<String>,  // Could be List<Game> if you have a model
-    private val onSelectionChanged: (List<String>) -> Unit
+    private val imageUrls: List<String>,
+    private val listener: OnImageCheckedListener
 ) : RecyclerView.Adapter<SearchAdapter.SearchViewHolder>() {
 
+    interface OnImageCheckedListener {
+        fun onImageChecked(url: String, isChecked: Boolean)
+    }
 
-    private val selectedItems = mutableSetOf<String>()
     inner class SearchViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-//      val ivThumbnail: ImageView = itemView.findViewById(R.id.ivGameThumbnail)
-        val tvName: TextView = itemView.findViewById(R.id.tvGameName)
-
-//        fun bind(gameName: String) {
-//            tvName.text = gameName
-//            // If you have image loading logic, add it here (Glide/Picasso)
-//            itemView.setOnClickListener { onSelectionChanged(gameName) }
-//        }
+        val imageView: ImageView = itemView.findViewById(R.id.imageViewSearchItem)
+        val checkBox: CheckBox = itemView.findViewById(R.id.checkBoxSearchItem)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_game_search, parent, false)
+            .inflate(R.layout.item_search_image, parent, false)
         return SearchViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: SearchViewHolder, position: Int) {
-//        holder.bind(gameList[position])
-        val item = gameList[position]
-        holder.tvName.text = item
+        val imageUrl = imageUrls[position]
 
-        // Highlight selection
-        holder.itemView.setBackgroundColor(
-            if (selectedItems.contains(item)) Color.LTGRAY else Color.TRANSPARENT
-        )
+        Glide.with(holder.itemView.context)
+            .load(imageUrl)
+            .centerCrop()
+            .into(holder.imageView)
+
+        holder.checkBox.setOnCheckedChangeListener(null)
+        holder.checkBox.isChecked = false // default unchecked
+
+        holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
+            listener.onImageChecked(imageUrl, isChecked)
+        }
 
         holder.itemView.setOnClickListener {
-            if (selectedItems.contains(item)) {
-                selectedItems.remove(item)
-            } else {
-                selectedItems.add(item)
-            }
-            notifyItemChanged(position)
-            onSelectionChanged(selectedItems.toList())
+            holder.checkBox.isChecked = !holder.checkBox.isChecked
         }
     }
 
-
-    override fun getItemCount(): Int = gameList.size
+    override fun getItemCount(): Int = imageUrls.size
 }

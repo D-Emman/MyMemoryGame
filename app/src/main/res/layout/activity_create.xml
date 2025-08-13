@@ -1,70 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
     tools:context=".CreateActivity">
 
-
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        />-->
-
-    <Button
-        android:id="@+id/btnSearchGames"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="92dp"
-        android:gravity="center"
-        android:text="Search Existing Games"
-        app:layout_constraintBottom_toTopOf="@id/rvImagePicker"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <Button
-        android:id="@+id/btnSave"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:enabled="false"
-        android:text="Save"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent" />
-
+    <!-- Game Name Input -->
     <EditText
-        android:id="@+id/etGameName"
-        android:layout_width="0dp"
+        android:id="@+id/editTextGameName"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:digits="1234567890abcdefghijklmnopqrstuvwxyz_-"
-        android:ems="10"
-        android:hint='Game Name (Example: "My new game")'
+        android:layout_marginTop="120dp"
+        android:hint="Enter game name"
+        android:inputType="textPersonName"
+        android:padding="12dp"
+        android:background="@android:drawable/edit_text"
+        android:textSize="16sp" />
 
-        android:imeOptions="actionDone|actionGo|actionSend"
+    <!-- Pick Images Button -->
 
-        android:importantForAutofill="no"
-        android:inputType="text"
-        android:maxLines="1"
-        app:layout_constraintBottom_toTopOf="@id/btnSave"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+    <!-- Selected Images RecyclerView -->
+
+    <!-- Save Game Button -->
+
+    <Button
+        android:id="@+id/btnPickImages"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Pick Images from Gallery" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvImagePicker"
-        android:layout_width="363dp"
-        android:layout_height="516dp"
-        android:layout_marginTop="16dp"
-        android:overScrollMode="never"
-        app:layout_constraintBottom_toTopOf="@+id/etGameName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.49"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:id="@+id/recyclerViewSelectedImages"
+        android:layout_width="372dp"
+        android:layout_height="500dp"
+        android:layout_marginTop="50dp"
+
+        android:scrollbars="vertical" />
+
+    <Button
+        android:id="@+id/btnSaveGame"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Save Game" />
+
+</LinearLayout>
