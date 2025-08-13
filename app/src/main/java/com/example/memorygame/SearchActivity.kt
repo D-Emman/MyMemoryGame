@@ -3,8 +3,10 @@ package com.example.memorygame
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +26,10 @@ class SearchActivity : AppCompatActivity(), SearchAdapter.OnImageCheckedListener
     private lateinit var progressBar: ProgressBar
     private lateinit var btnConfirmSelection: Button
 
+    private lateinit var editTextSearch : EditText
+
+    private lateinit var btnSearch: Button
+
     private lateinit var searchAdapter: SearchAdapter
     private val searchResults = mutableListOf<String>()
     private val selectedUrls = mutableSetOf<String>()
@@ -35,6 +41,7 @@ class SearchActivity : AppCompatActivity(), SearchAdapter.OnImageCheckedListener
         recyclerView = findViewById(R.id.recyclerViewSearchResults)
         progressBar = findViewById(R.id.progressBar)
         btnConfirmSelection = findViewById(R.id.btnConfirmSelection)
+        btnSearch = findViewById(R.id.btnSearch)
 
         recyclerView.layoutManager = GridLayoutManager(this, 3)
         searchAdapter = SearchAdapter(searchResults, this)
@@ -51,18 +58,52 @@ class SearchActivity : AppCompatActivity(), SearchAdapter.OnImageCheckedListener
             }
         }
 
-        loadSearchResults()
+        btnSearch.setOnClickListener {
+            val query = editTextSearch.text.toString().trim()
+            loadSearchResults(query)
+        }
+
+
+//        loadSearchResults()
     }
 
-    private fun loadSearchResults() {
+    private fun loadSearchResults(query: String) {
         progressBar.visibility = View.VISIBLE
+
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val bucket = SupabaseStorage.client.storage.from("custom")
-                val fileObjects = bucket.list()
+                val files = bucket.list() // Gets all files
+
+                // Filter files by query
+                val filtered = if (query.isNotEmpty()) {
+                    files.filter { it.name.contains(query, ignoreCase = true) }
+                } else {
+                    files
+                }
+
+                Log.d("SearchActivity", "Filtered files count: ${filtered.size}")
+
+                // Convert to public URLs
+                val urls = filtered.map {
+                    val url = bucket.publicUrl(it.name)
+                    Log.d("SearchActivity", "Public URL: $url")
+                    url
+                }
+
+                withContext(Dispatchers.Main) {
+                    searchResults.clear()
+                    searchResults.addAll(urls)
+                    searchAdapter.notifyDataSetChanged()
+                    progressBar.visibility = View.GONE
+
+                    if (urls.isEmpty()) {
+                        Toast.makeText(this@SearchActivity, "No results found", Toast.LENGTH_SHORT).show()
+                    }
+                }
 
                 searchResults.clear()
-                searchResults.addAll(fileObjects.map { bucket.publicUrl(it.name) })
+                searchResults.addAll(filtered.map { bucket.publicUrl(it.name) })
 
                 withContext(Dispatchers.Main) {
                     progressBar.visibility = View.GONE
@@ -71,11 +112,12 @@ class SearchActivity : AppCompatActivity(), SearchAdapter.OnImageCheckedListener
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) {
                     progressBar.visibility = View.GONE
-                    Toast.makeText(this@SearchActivity, "Error loading results", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@SearchActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
     }
+
 
     override fun onImageChecked(url: String, isChecked: Boolean) {
         if (isChecked) selectedUrls.add(url) else selectedUrls.remove(url)
