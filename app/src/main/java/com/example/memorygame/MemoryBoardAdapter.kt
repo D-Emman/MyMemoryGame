@@ -28,6 +28,7 @@ class MemoryBoardAdapter(
 
         interface CradClickListener{
             fun onCardClicked(position: Int)
+
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -37,7 +38,7 @@ class MemoryBoardAdapter(
         val view = LayoutInflater.from(context).inflate(R.layout.memory_card, parent, false)
         val layoutParams = view.findViewById<CardView>(R.id.cardView).layoutParams as ViewGroup.MarginLayoutParams
         layoutParams.width = cardSideLength
-        layoutParams.height  = cardSideLength
+        layoutParams.height = cardSideLength
         layoutParams.setMargins(MARGIN_SIZE, MARGIN_SIZE, MARGIN_SIZE, MARGIN_SIZE)
         return ViewHolder(view)
     }

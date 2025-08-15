@@ -53,7 +53,7 @@ class SearchActivity : AppCompatActivity(), SearchAdapter.OnImageCheckedListener
             } else {
                 val intent = Intent()
                 intent.putStringArrayListExtra("SELECTED_IMAGE_URLS", ArrayList(selectedUrls))
-                setResult(Activity.RESULT_OK, intent)
+                setResult(RESULT_OK, intent)
                 finish()
             }
         }

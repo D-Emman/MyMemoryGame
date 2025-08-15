@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var rvBoard: RecyclerView
     private lateinit var tvNumMoves: TextView
     private lateinit var tvNumPairs: TextView
-    private lateinit var adapter: MemoryBoardAdapter
+    private lateinit var ladapter: MemoryBoardAdapter
     private var boardSize: BoardSize = BoardSize.EASY
 
 
@@ -191,7 +191,7 @@ class MainActivity : AppCompatActivity() {
 
         memoryGame = MemoryGame(boardSize)
 
-        adapter = MemoryBoardAdapter(this, boardSize, memoryGame.cards, object: MemoryBoardAdapter.CradClickListener{
+        ladapter = MemoryBoardAdapter(this, boardSize, memoryGame.cards, object: MemoryBoardAdapter.CradClickListener{
             override fun onCardClicked(position: Int) {
                 updateGameWithFlip(position)
 //                Log.i(TAG, "Card clicked $position")
@@ -199,13 +199,13 @@ class MainActivity : AppCompatActivity() {
             }
 
         } )
-        rvBoard.adapter = adapter
+        rvBoard.adapter = ladapter
         rvBoard.setHasFixedSize(true)
         rvBoard.layoutManager = GridLayoutManager( this, boardSize.getWidth())
     }
-
     @SuppressLint("RestrictedApi")
     private fun updateGameWithFlip(position: Int) {
+
         //Error checking
         if(memoryGame.haveWonGame()){
             // Alert the User of an invalid move
@@ -233,7 +233,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         tvNumMoves.text = "Moves: ${memoryGame.getNumMoves()}"
-        adapter.notifyDataSetChanged()
+        ladapter.notifyDataSetChanged()
     }
 
 }
