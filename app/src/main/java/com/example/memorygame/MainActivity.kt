@@ -186,7 +186,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
         tvNumPairs.setTextColor(ContextCompat.getColor(this, R.color.color_progress_none))
 
         memoryGame = MemoryGame(boardSize)

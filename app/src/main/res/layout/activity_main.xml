@@ -8,17 +8,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     tools:context=".MainActivity">
-  <!--    <androidx.appcompat.widget.Toolbar-->
-    <!--        android:id="@+id/my_toolbar"-->
-    <!--        android:layout_width="0dp"-->
-    <!--        android:layout_height="0dp"-->
-    <!--        android:background="?attr/colorPrimary"-->
-    <!--        android:elevation="4dp"-->
-    <!--        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"-->
-    <!--        tools:ignore="MissingConstraints" />-->
+git
     <LinearLayout
         android:id="@+id/llGameInfo"
         android:layout_width="0dp"
