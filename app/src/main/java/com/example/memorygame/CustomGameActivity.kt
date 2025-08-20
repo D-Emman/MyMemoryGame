@@ -1,5 +1,4 @@
 package com.example.memorygame
-
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -112,6 +111,7 @@ class CustomGameActivity : AppCompatActivity() {
                 if (matchedCards.size == pairedImages.size) {
                     Toast.makeText(this, "🎉 You Win!", Toast.LENGTH_LONG).show()
                 }
+                
             }, 1000)
         }
     }
