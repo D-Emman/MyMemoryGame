@@ -1,5 +1,4 @@
 package com.example.memorygame
-
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -15,7 +14,7 @@ import com.example.memorygame.adapters.SelectedImagesAdapter
 
 class CreateActivity : AppCompatActivity() {
 
-    // Set how many images are required for your board (adjust as needed)
+    // Set the number of images that are required for your board (adjust as needed)
     private var numImagesRequired = 6
 
     private lateinit var etGameName: EditText
